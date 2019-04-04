@@ -6,6 +6,7 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.0'
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.4.17"
     }
 }
 
@@ -17,6 +18,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.4'
 }
 apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.artifactory'
 
 
 allprojects {
@@ -142,4 +144,35 @@ bintray {
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.4'
+}
+
+// Artifactory upload
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = 'gradle-release-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+        defaults {
+            publications('aar')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+}
+
+publishing {
+    publications {
+        aar(MavenPublication) {
+            groupId 'com.bugsnag'
+            artifactId 'bugsnag-android-gradle-plugin'
+            version project.version
+
+            artifact("$buildDir/libs/${project.getName()}-${version}.jar")
+        }
+    }
 }
