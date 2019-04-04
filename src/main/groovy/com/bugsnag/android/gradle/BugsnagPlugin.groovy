@@ -366,7 +366,16 @@ class BugsnagPlugin implements Plugin<Project> {
      * greater than the number of variants.
      */
     static boolean hasMultipleOutputs(Project project) {
-        DomainObjectSet<ApplicationVariant> variants = project.android.applicationVariants
+        DomainObjectSet<BaseVariant> variants
+
+        if (project.plugins.hasPlugin(AppPlugin)) {
+            variants = project.android.applicationVariants
+        } else if (project.plugins.hasPlugin(LibraryPlugin)) {
+            variants = project.android.libraryVariants
+        } else {
+            throw new IllegalStateException('Must apply \'com.android.application\' first!')
+        }
+
         int variantSize = variants.size()
         int outputSize = 0
 

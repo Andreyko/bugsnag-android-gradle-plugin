@@ -3,7 +3,6 @@ package com.bugsnag.android.gradle
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntity
 import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.util.TextUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -64,7 +63,9 @@ class BugsnagUploadProguardTask extends BugsnagMultiPartUploadTask {
     }
 
     private File findMappingFile() {
-        if (BugsnagPlugin.hasDexguardPlugin(project) && BugsnagPlugin.hasMultipleOutputs(project)) {
+        if (BugsnagPlugin.hasDexguardPlugin(project)
+            && (BugsnagPlugin.hasMultipleOutputs(project) || variant.mappingFile == null)) {
+
             def mappingFile = findDexguardMappingFile(project)
 
             if (mappingFile && mappingFile.exists()) {
@@ -74,6 +75,7 @@ class BugsnagUploadProguardTask extends BugsnagMultiPartUploadTask {
                     " falling back to AGP mapping file value")
             }
         }
+
         // use AGP supplied value by default, or as fallback
         return variant.mappingFile
     }
